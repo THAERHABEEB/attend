@@ -3,168 +3,190 @@ import pandas as pd
 import os
 from datetime import datetime
 from PIL import Image
-import time
 
-# ========================= إعداد الصفحة =========================
-st.set_page_config(page_title="نظام الحضور بالوجه", page_icon="📸", layout="wide")
+# ===================== ⚙️ إعداد الصفحة =====================
+st.set_page_config(
+    page_title="نظام الحضور بالوجه",
+    page_icon="📸",
+    layout="wide",
+    initial_sidebar_state="expanded"
+)
 
-# ========================= تنسيق CSS =========================
+# ===================== 🎨 تنسيق واجهة المستخدم =====================
 st.markdown("""
 <style>
 body {
-    background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
-    color: white;
-    font-family: 'Cairo', sans-serif;
+  background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+  color: white;
+  font-family: "Cairo", sans-serif;
 }
 
-/* 📋 القائمة الجانبية */
-[data-testid="stSidebar"] {
-    background: linear-gradient(160deg, #141E30, #243B55);
-    color: white;
-    padding-top: 1rem;
-    border-right: 2px solid rgba(255,255,255,0.08);
-    transition: all 0.3s ease-in-out;
+/* ===== عناوين متحركة ===== */
+h1, h2, h3 {
+  text-align: center;
+  color: #00e0ff;
+  text-shadow: 0 0 15px rgba(0,224,255,0.7);
+  animation: fadeSlide 2s ease-in-out;
 }
 
-/* عنوان القائمة */
-[data-testid="stSidebar"]::before {
-    content: '📊 FACE ATTENDANCE';
-    display: block;
-    font-weight: 700;
-    font-size: 18px;
-    color: #00e5ff;
-    text-align: center;
-    margin-bottom: 1rem;
-    animation: fadeIn 2s ease-in-out;
+@keyframes fadeSlide {
+  from {opacity: 0; transform: translateY(-10px);}
+  to {opacity: 1; transform: translateY(0);}
 }
 
-/* أنيميشن Fade-in */
-@keyframes fadeIn {
-    from {opacity: 0; transform: translateY(-8px);}
-    to {opacity: 1; transform: translateY(0);}
+/* ===== أنيميشن الدائرة ===== */
+.pulse-circle {
+  width: 140px;
+  height: 140px;
+  border-radius: 50%;
+  margin: 30px auto;
+  background: radial-gradient(circle, #00e0ff, #007acc);
+  box-shadow: 0 0 0 rgba(0, 224, 255, 0.4);
+  animation: pulse 2s infinite;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 20px;
+  font-weight: bold;
 }
 
-/* دائرة الأنيميشن */
 @keyframes pulse {
-    0% {box-shadow: 0 0 0 0 rgba(0,229,255, 0.6);}
-    50% {box-shadow: 0 0 0 25px rgba(0,229,255, 0);}
-    100% {box-shadow: 0 0 0 0 rgba(0,229,255, 0);}
-}
-.circle {
-    width: 140px;
-    height: 140px;
-    border-radius: 50%;
-    background: radial-gradient(circle at 30% 30%, #00e5ff, #007acc);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin: 20px auto;
-    animation: pulse 2.5s infinite;
-    color: white;
-    font-size: 20px;
-    font-weight: bold;
-    text-shadow: 1px 1px 10px rgba(0,0,0,0.4);
+  0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(0,224,255,0.7);}
+  70% { transform: scale(1); box-shadow: 0 0 0 25px rgba(0,224,255,0);}
+  100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(0,224,255,0);}
 }
 
-/* قسم التواصل */
-.contact-box {
-    position: absolute;
-    bottom: 20px;
-    width: 90%;
-    text-align: center;
-    border-top: 1px solid rgba(255,255,255,0.15);
-    padding-top: 8px;
-    animation: fadeIn 2s ease-in-out;
-}
-.contact-box h4 {
-    color: #00e5ff;
-    font-size: 14px;
-    margin-bottom: 3px;
-}
-.contact-box p {
-    margin: 0;
-    font-size: 13px;
-    color: #ddd;
-    font-weight: 500;
+/* ===== القائمة الجانبية ===== */
+[data-testid="stSidebar"] {
+  background: linear-gradient(160deg, #141E30, #243B55);
+  color: white;
+  border-right: 2px solid rgba(255,255,255,0.1);
+  transition: all 0.3s ease;
 }
 
-/* تحسين التنسيق على الشاشات الصغيرة */
+[data-testid="stSidebar"] h2 {
+  text-align: center;
+  color: #00e5ff;
+  font-size: 20px;
+  animation: glowText 2s ease-in-out infinite alternate;
+}
+
+@keyframes glowText {
+  from { text-shadow: 0 0 10px #00e5ff; }
+  to { text-shadow: 0 0 30px #00e5ff; }
+}
+
+/* ===== للأجهزة المختلفة ===== */
 @media (max-width: 600px) {
-    .circle {
-        width: 110px;
-        height: 110px;
-        font-size: 16px;
-    }
-    h1, h2, h3 {
-        font-size: 1.3rem !important;
-    }
-}
-@media (min-width: 601px) and (max-width: 1024px) {
-    .circle {
-        width: 130px;
-        height: 130px;
-    }
+  .pulse-circle { width: 100px; height: 100px; font-size: 14px; }
+  h1, h2, h3 { font-size: 1.3rem !important; }
 }
 </style>
 """, unsafe_allow_html=True)
 
-# ========================= القائمة الجانبية =========================
-menu = st.sidebar.radio("القائمة", ["🧑‍🎓 الطالب", "🧑‍🏫 الدكتور"])
+# ===================== ⚙️ تهيئة الملفات =====================
+EXCEL_FILE = "attendance.xlsx"
+if not os.path.exists(EXCEL_FILE):
+    df = pd.DataFrame(columns=["Name", "Date", "Time"])
+    df.to_excel(EXCEL_FILE, index=False)
+else:
+    df = pd.read_excel(EXCEL_FILE)
 
-# قسم التواصل أسفل القائمة الجانبية
-st.sidebar.markdown("""
-<div class="contact-box">
-    <h4>👨‍💻 Eng. Thaer Habeeb</h4>
-    <p>📞 01121412387</p>
-</div>
-""", unsafe_allow_html=True)
+if not os.path.exists("students"):
+    os.makedirs("students")
 
-# ========================= صفحة الطالب =========================
-if menu == "🧑‍🎓 الطالب":
-    st.title("📸 نظام تسجيل الحضور بالوجه - الطالب")
-    st.markdown("### 👋 مرحبًا! تأكد أن الكاميرا تعمل، ثم التقط صورتك لتسجيل حضورك.")
+# ===================== 🧭 القائمة الجانبية =====================
+st.sidebar.title("📋 نظام الحضور الذكي")
+page = st.sidebar.radio("اختر الصفحة:", ["🧑‍🎓 صفحة الطالب", "🧑‍🏫 لوحة الدكتور"])
 
-    # دائرة الأنيميشن
-    st.markdown('<div class="circle">SCAN</div>', unsafe_allow_html=True)
+# ===================== 🧑‍🎓 صفحة الطالب =====================
+if page == "🧑‍🎓 صفحة الطالب":
+    st.markdown("<div class='pulse-circle'>SCAN</div>", unsafe_allow_html=True)
+    st.title("🎓 نظام تسجيل الحضور بالوجه")
+    st.markdown("---")
 
-    uploaded_file = st.file_uploader("📷 ارفع صورتك هنا", type=["jpg", "jpeg", "png"])
-    if uploaded_file:
-        image = Image.open(uploaded_file)
-        st.image(image, caption="الصورة المرفوعة", use_container_width=True)
-        st.success("✅ تم رفع الصورة بنجاح!")
-        time.sleep(1)
-        st.info("جارٍ التحقق من الصورة ...")
-        time.sleep(2)
-        st.success("تم تسجيل حضورك بنجاح ✅")
+    name = st.text_input("👤 أدخل اسم الطالب:")
+    camera_input = st.camera_input("📸 التقط صورة الطالب:")
 
-# ========================= صفحة الدكتور =========================
-elif menu == "🧑‍🏫 الدكتور":
+    if st.button("✅ تسجيل الحضور"):
+        if not name:
+            st.warning("⚠️ من فضلك أدخل اسم الطالب أولاً.")
+        elif camera_input is None:
+            st.warning("📸 التقط صورة قبل التسجيل.")
+        elif name in df["Name"].values:
+            st.info(f"🟢 الاسم '{name}' موجود بالفعل في القائمة.")
+        else:
+            img_path = f"students/{name}.jpg"
+            with open(img_path, "wb") as f:
+                f.write(camera_input.getbuffer())
+
+            now = datetime.now()
+            new_row = pd.DataFrame([[name, now.strftime("%Y-%m-%d"), now.strftime("%H:%M:%S")]],
+                                   columns=["Name", "Date", "Time"])
+            df = pd.concat([df, new_row], ignore_index=True)
+            df.to_excel(EXCEL_FILE, index=False)
+
+            st.success(f"✅ تم تسجيل {name} بنجاح.")
+            st.image(img_path, caption=f"📸 صورة {name}", width=250)
+
+    st.markdown("---")
+    st.subheader("📋 قائمة الحضور الحالية:")
+    st.dataframe(df, use_container_width=True)
+
+    with open(EXCEL_FILE, "rb") as file:
+        st.download_button(
+            label="⬇️ تحميل ملف Excel",
+            data=file,
+            file_name="attendance.xlsx",
+            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        )
+
+# ===================== 🧑‍🏫 لوحة الدكتور =====================
+elif page == "🧑‍🏫 لوحة الدكتور":
     st.title("🧑‍🏫 لوحة تحكم الدكتور")
+    st.markdown("---")
+
     password = st.text_input("🔑 أدخل كلمة المرور:", type="password")
 
     if password == "admin123":
-        st.success("تم تسجيل الدخول بنجاح ✅")
+        st.success("✅ تم تسجيل الدخول بنجاح")
 
-        st.markdown("### 📊 نظرة عامة على الحضور")
-        if os.path.exists("attendance.xlsx"):
-            df = pd.read_excel("attendance.xlsx")
-            total = len(df)
-            today = datetime.now().strftime("%Y-%m-%d")
-            today_attendance = df[df['Date'] == today]
-            today_count = len(today_attendance)
+        df = pd.read_excel(EXCEL_FILE)
+        st.markdown("### 📊 بيانات الحضور")
+        st.dataframe(df, use_container_width=True)
 
-            col1, col2, col3 = st.columns(3)
-            col1.metric("إجمالي السجلات", total)
-            col2.metric("حضور اليوم", today_count)
-            if total:
-                col3.metric("نسبة الحضور اليوم", f"{(today_count / total * 100):.1f}%")
+        # 📆 ملخص الأرقام
+        today = datetime.now().strftime("%Y-%m-%d")
+        today_count = len(df[df["Date"] == today])
+        total = len(df)
+        percent = (today_count / total * 100) if total else 0
+
+        col1, col2, col3 = st.columns(3)
+        col1.metric("إجمالي الحضور", total)
+        col2.metric("حضور اليوم", today_count)
+        col3.metric("نسبة اليوم", f"{percent:.1f}%")
+
+        # 🔍 البحث
+        st.markdown("### 🔍 البحث عن طالب")
+        search_name = st.text_input("ابحث بالاسم:")
+        if search_name:
+            results = df[df["Name"].str.contains(search_name, case=False, na=False)]
+            if not results.empty:
+                st.dataframe(results)
             else:
-                col3.metric("نسبة الحضور اليوم", "0%")
+                st.warning("❌ لم يتم العثور على هذا الاسم.")
 
-            st.markdown("### 🧾 بيانات الحضور")
-            st.dataframe(df, use_container_width=True)
-        else:
-            st.warning("⚠️ لا يوجد ملف حضور بعد.")
+        # 🗑️ حذف
+        st.markdown("### 🗑️ حذف طالب")
+        delete_name = st.text_input("اكتب اسم الطالب لحذفه:")
+        if st.button("حذف الطالب"):
+            if delete_name in df["Name"].values:
+                df = df[df["Name"] != delete_name]
+                df.to_excel(EXCEL_FILE, index=False)
+                st.success(f"تم حذف {delete_name} بنجاح ✅")
+            else:
+                st.error("⚠️ الاسم غير موجود.")
     elif password:
         st.error("❌ كلمة مرور غير صحيحة")
         
