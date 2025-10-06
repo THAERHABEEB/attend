@@ -164,5 +164,4 @@ elif page == "🧑‍🏫 لوحة الدكتور":
                 data=file,
                 file_name="attendance.xlsx",
                 mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-  )
-          
+            )
