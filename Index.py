@@ -1,18 +1,14 @@
+
 import streamlit as st
 import pandas as pd
 import os
 from datetime import datetime
 from PIL import Image
 
-# ===================== ⚙️ إعداد الصفحة =====================
-st.set_page_config(
-    page_title="نظام الحضور الذكي",
-    page_icon="🎓",
-    layout="centered",
-    initial_sidebar_state="expanded"
-)
+# إعداد الصفحة
+st.set_page_config(page_title="نظام الحضور بالوجه", page_icon="📸", layout="centered", initial_sidebar_state="expanded")
 
-# ===================== 🎨 CSS + أنيميشن =====================
+# ===================== 🎨 تنسيق CSS =====================
 st.markdown("""
 <style>
 body {
@@ -23,19 +19,13 @@ body {
 h1 {
   text-align: center;
   color: #00e0ff;
-  font-size: 2.3rem;
+  font-size: 2.5rem;
   animation: glow 2s infinite alternate;
-}
-h2, h3, h4 {
-  color: #00e0ff;
-  text-align: center;
 }
 @keyframes glow {
   from { text-shadow: 0 0 10px #00e0ff, 0 0 20px #00e0ff; }
-  to { text-shadow: 0 0 25px #00e0ff, 0 0 40px #00e0ff; }
+  to { text-shadow: 0 0 30px #00e0ff, 0 0 40px #00e0ff; }
 }
-
-/* 🎨 تحسين شكل الأزرار */
 button {
   border-radius: 10px !important;
   transition: transform 0.3s ease, box-shadow 0.3s ease !important;
@@ -44,27 +34,8 @@ button:hover {
   transform: scale(1.05);
   box-shadow: 0 0 15px #00e0ff !important;
 }
-
-/* 🌈 أنيميشن القائمة الجانبية */
-[data-testid="stSidebar"] {
-  background: linear-gradient(180deg, #203a43, #2c5364);
-  animation: slideIn 1.2s ease;
-  border-right: 2px solid #00e0ff;
-}
-@keyframes slideIn {
-  from { transform: translateX(-100%); opacity: 0; }
-  to { transform: translateX(0); opacity: 1; }
-}
-
-/* ⚙️ استجابة للأجهزة الصغيرة */
-@media (max-width: 600px) {
-  h1 { font-size: 1.8rem; }
-  .stButton button, .stTextInput, .stCameraInput {
-    width: 100% !important;
-  }
-}
 </style>
-<h1>HITU<br>Data Science</h1>
+<h1>HITU<br> Data Science</h1>
 """, unsafe_allow_html=True)
 
 # ===================== ⚙️ الإعداد =====================
@@ -80,15 +51,15 @@ if not os.path.exists("students"):
 
 # ===================== 🧭 القائمة الجانبية =====================
 st.sidebar.title("📋 القائمة")
-page = st.sidebar.radio("اختر الصفحة:", ["🎓 صفحة الطالب", "🧑‍🏫 لوحة الدكتور"])
+page = st.sidebar.radio("اختر الصفحة:", ["🧑‍🎓 صفحة الطالب", "🧑‍🏫 لوحة الدكتور"])
 
 # ===================== 👨‍🎓 صفحة الطالب =====================
-if page == "🎓 صفحة الطالب":
-    st.markdown("<h2>📸 نظام تسجيل الحضور الذكي</h2>", unsafe_allow_html=True)
+if page == "🧑‍🎓 صفحة الطالب":
+    st.title("🎓 نظام تسجيل الحضور الذكي")
     st.markdown("---")
 
     name = st.text_input("👤 أدخل اسم الطالب:")
-    camera_input = st.camera_input("📷 التقط صورة الطالب:")
+    camera_input = st.camera_input("📸 التقط صورة الطالب:")
 
     if st.button("✅ تسجيل الحضور"):
         if not name:
@@ -119,23 +90,23 @@ if page == "🎓 صفحة الطالب":
 
 # ===================== 👨‍🏫 لوحة الدكتور =====================
 elif page == "🧑‍🏫 لوحة الدكتور":
-    st.markdown("<h2>🧑‍🏫 لوحة تحكم الدكتور</h2>", unsafe_allow_html=True)
-    st.markdown("---")
+    st.title("🧑‍🏫 لوحة تحكم الدكتور")
 
-    # كلمة المرور فقط تظهر بعد اختيار الصفحة
-    password = st.text_input("🔑 أدخل كلمة المرور:", type="password", placeholder="********")
+    # كلمة المرور
+    password = st.text_input("🔑 أدخل كلمة المرور:", type="password")
 
-    CORRECT_PASSWORD = "hitu123"  # يمكنك تغييرها
+    # حدد كلمة المرور هنا
+    CORRECT_PASSWORD = "hitu123"
 
-    if password:
+    if st.button("دخول"):
         if password == CORRECT_PASSWORD:
             st.success("✅ تم تسجيل الدخول بنجاح!")
             st.markdown("---")
 
-            st.markdown("<h3>📊 قائمة الحضور الكاملة</h3>", unsafe_allow_html=True)
-            st.dataframe(df, use_container_width=True)
+            st.subheader("📊 قائمة الحضور الكاملة:")
+            st.dataframe(df)
 
-            st.markdown(f"<h4>📅 عدد الطلاب المسجلين: {len(df)}</h4>", unsafe_allow_html=True)
+            st.markdown(f"📅 عدد الطلاب المسجلين اليوم: **{len(df)}**")
 
             # زر تحميل الملف
             with open(EXCEL_FILE, "rb") as file:
@@ -145,9 +116,6 @@ elif page == "🧑‍🏫 لوحة الدكتور":
                     file_name="attendance.xlsx",
                     mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
                 )
-
         else:
             st.error("❌ كلمة المرور غير صحيحة.")
-    else:
-        st.info("🟡 الرجاء إدخال كلمة المرور للدخول إلى لوحة التحكم.")
             
