@@ -4,15 +4,15 @@ import os
 from datetime import datetime
 from PIL import Image
 
-# إعداد الصفحة
+# ===================== ⚙️ إعداد الصفحة =====================
 st.set_page_config(
-    page_title="نظام الحضور بالوجه",
-    page_icon="📸",
+    page_title="نظام الحضور الذكي",
+    page_icon="🎓",
     layout="centered",
-    initial_sidebar_state="expanded"  # ✅ القائمة الجانبية مفتوحة دائمًا
+    initial_sidebar_state="expanded"
 )
 
-# ===================== 🎨 تنسيق CSS + أنيميشن =====================
+# ===================== 🎨 CSS + أنيميشن =====================
 st.markdown("""
 <style>
 body {
@@ -23,18 +23,19 @@ body {
 h1 {
   text-align: center;
   color: #00e0ff;
-  font-size: 2.5rem;
+  font-size: 2.3rem;
   animation: glow 2s infinite alternate;
+}
+h2, h3, h4 {
+  color: #00e0ff;
+  text-align: center;
 }
 @keyframes glow {
   from { text-shadow: 0 0 10px #00e0ff, 0 0 20px #00e0ff; }
-  to { text-shadow: 0 0 30px #00e0ff, 0 0 40px #00e0ff; }
+  to { text-shadow: 0 0 25px #00e0ff, 0 0 40px #00e0ff; }
 }
-.HITU {
-  position: relative;
-  color: #795548;
-  bottom: 20px;
-}
+
+/* 🎨 تحسين شكل الأزرار */
 button {
   border-radius: 10px !important;
   transition: transform 0.3s ease, box-shadow 0.3s ease !important;
@@ -43,29 +44,27 @@ button:hover {
   transform: scale(1.05);
   box-shadow: 0 0 15px #00e0ff !important;
 }
-.pulse-animation {
-  width: 130px;
-  height: 130px;
-  border-radius: 50%;
-  margin: auto;
-  border: 5px solid #00e0ff;
-  animation: pulse 2s infinite;
+
+/* 🌈 أنيميشن القائمة الجانبية */
+[data-testid="stSidebar"] {
+  background: linear-gradient(180deg, #203a43, #2c5364);
+  animation: slideIn 1.2s ease;
+  border-right: 2px solid #00e0ff;
 }
-@keyframes pulse {
-  0% { transform: scale(0.9); box-shadow: 0 0 0 0 rgba(0,224,255, 0.7); }
-  70% { transform: scale(1); box-shadow: 0 0 0 20px rgba(0,224,255, 0); }
-  100% { transform: scale(0.9); box-shadow: 0 0 0 0 rgba(0,224,255, 0); }
+@keyframes slideIn {
+  from { transform: translateX(-100%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
 }
+
+/* ⚙️ استجابة للأجهزة الصغيرة */
 @media (max-width: 600px) {
+  h1 { font-size: 1.8rem; }
   .stButton button, .stTextInput, .stCameraInput {
     width: 100% !important;
   }
-  .stDataFrame {
-    font-size: 0.8rem;
-  }
 }
 </style>
-<h1 class="HITU">HITU<br>Data Science</h1>
+<h1>HITU<br>Data Science</h1>
 """, unsafe_allow_html=True)
 
 # ===================== ⚙️ الإعداد =====================
@@ -81,16 +80,15 @@ if not os.path.exists("students"):
 
 # ===================== 🧭 القائمة الجانبية =====================
 st.sidebar.title("📋 القائمة")
-page = st.sidebar.radio("اختر الصفحة:", ["🧑‍🎓 صفحة الطالب", "🧑‍🏫 لوحة الدكتور"])
+page = st.sidebar.radio("اختر الصفحة:", ["🎓 صفحة الطالب", "🧑‍🏫 لوحة الدكتور"])
 
-# ===================== 👩‍🎓 صفحة الطالب =====================
-if page == "🧑‍🎓 صفحة الطالب":
-    st.markdown("<div class='pulse-animation'></div>", unsafe_allow_html=True)
-    st.title("🎓 نظام تسجيل الحضور الذكي")
+# ===================== 👨‍🎓 صفحة الطالب =====================
+if page == "🎓 صفحة الطالب":
+    st.markdown("<h2>📸 نظام تسجيل الحضور الذكي</h2>", unsafe_allow_html=True)
     st.markdown("---")
 
     name = st.text_input("👤 أدخل اسم الطالب:")
-    camera_input = st.camera_input("📸 التقط صورة الطالب:")
+    camera_input = st.camera_input("📷 التقط صورة الطالب:")
 
     if st.button("✅ تسجيل الحضور"):
         if not name:
@@ -100,10 +98,12 @@ if page == "🧑‍🎓 صفحة الطالب":
         elif name in df["Name"].values:
             st.info(f"🟢 الاسم '{name}' موجود بالفعل في القائمة.")
         else:
+            # حفظ الصورة
             img_path = f"students/{name}.jpg"
             with open(img_path, "wb") as f:
                 f.write(camera_input.getbuffer())
 
+            # حفظ البيانات في Excel
             now = datetime.now()
             new_row = pd.DataFrame([[name, now.strftime("%Y-%m-%d"), now.strftime("%H:%M:%S")]],
                                    columns=["Name", "Date", "Time"])
@@ -117,51 +117,37 @@ if page == "🧑‍🎓 صفحة الطالب":
     st.subheader("📋 قائمة الحضور:")
     st.dataframe(df)
 
-    with open(EXCEL_FILE, "rb") as file:
-        btn = st.download_button(
-            label="⬇️ تحميل ملف الحضور Excel",
-            data=file,
-            file_name="attendance.xlsx",
-            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-        )
-
-# ===================== 🧑‍🏫 لوحة الدكتور =====================
+# ===================== 👨‍🏫 لوحة الدكتور =====================
 elif page == "🧑‍🏫 لوحة الدكتور":
-    st.title("🧑‍🏫 لوحة تحكم الدكتور")
+    st.markdown("<h2>🧑‍🏫 لوحة تحكم الدكتور</h2>", unsafe_allow_html=True)
     st.markdown("---")
 
-    if not os.path.exists(EXCEL_FILE) or os.path.getsize(EXCEL_FILE) == 0:
-        st.warning("📂 لا توجد بيانات حالياً في ملف الحضور.")
+    # كلمة المرور فقط تظهر بعد اختيار الصفحة
+    password = st.text_input("🔑 أدخل كلمة المرور:", type="password", placeholder="********")
+
+    CORRECT_PASSWORD = "hitu123"  # يمكنك تغييرها
+
+    if password:
+        if password == CORRECT_PASSWORD:
+            st.success("✅ تم تسجيل الدخول بنجاح!")
+            st.markdown("---")
+
+            st.markdown("<h3>📊 قائمة الحضور الكاملة</h3>", unsafe_allow_html=True)
+            st.dataframe(df, use_container_width=True)
+
+            st.markdown(f"<h4>📅 عدد الطلاب المسجلين: {len(df)}</h4>", unsafe_allow_html=True)
+
+            # زر تحميل الملف
+            with open(EXCEL_FILE, "rb") as file:
+                st.download_button(
+                    label="⬇️ تحميل ملف الحضور Excel",
+                    data=file,
+                    file_name="attendance.xlsx",
+                    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                )
+
+        else:
+            st.error("❌ كلمة المرور غير صحيحة.")
     else:
-        df = pd.read_excel(EXCEL_FILE)
-        st.dataframe(df)
-
-        # 🔍 البحث
-        search_name = st.text_input("🔎 ابحث عن طالب بالاسم:")
-        if search_name:
-            results = df[df["Name"].str.contains(search_name, case=False, na=False)]
-            if not results.empty:
-                st.write("نتائج البحث:")
-                st.dataframe(results)
-            else:
-                st.warning("❌ لم يتم العثور على الطالب المطلوب.")
-
-        # 🗑️ حذف طالب
-        delete_name = st.text_input("❌ اكتب اسم الطالب لحذفه من السجل:")
-        if st.button("🗑️ حذف الطالب"):
-            if delete_name in df["Name"].values:
-                df = df[df["Name"] != delete_name]
-                df.to_excel(EXCEL_FILE, index=False)
-                st.success(f"تم حذف {delete_name} بنجاح ✅")
-            else:
-                st.error("⚠️ الاسم غير موجود.")
-
-        st.markdown("---")
-        # ⬇️ تحميل ملف الحضور
-        with open(EXCEL_FILE, "rb") as file:
-            st.download_button(
-                label="⬇️ تحميل ملف Excel كامل",
-                data=file,
-                file_name="attendance.xlsx",
-                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-            )
+        st.info("🟡 الرجاء إدخال كلمة المرور للدخول إلى لوحة التحكم.")
+            
